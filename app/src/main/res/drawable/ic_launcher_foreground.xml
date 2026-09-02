@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Centered Tiny White Moon Icon (Safe Zone: 54, 54 center) -->
+    
+    <!-- Subtle Soft White Ambient Glow -->
+    <path
+        android:pathData="M54,38 C62.84,38 70,45.16 70,54 C70,62.84 62.84,70 54,70 C45.16,70 38,62.84 38,54 C38,45.16 45.16,38 54,38 Z"
+        android:fillColor="#15FFFFFF" />
+
+    <!-- Tiny Crisp White Crescent Moon (approx 20dp span centered at 54,54) -->
+    <path
+        android:pathData="M58,44 C60,46.4 61.2,49.5 61.2,53 C61.2,60.5 55.2,66.5 47.7,66.5 C45.2,66.5 42.8,65.8 40.8,64.6 C43.2,70.5 49,74.5 55.8,74.5 C64.7,74.5 72,67.2 72,58.3 C72,51.5 67.8,45.8 58,44 Z"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Delicate White Sparkle Accent (Upper Left) -->
+    <path
+        android:pathData="M43,44 L43.8,46.2 L46,47 L43.8,47.8 L43,50 L42.2,47.8 L40,47 L42.2,46.2 Z"
+        android:fillColor="#E0F2FE" />
+
+    <!-- Tiny Subtle Star Node (Top Right) -->
+    <path
+        android:pathData="M66,41 L66.5,42.2 L67.7,42.7 L66.5,43.2 L66,44.4 L65.5,43.2 L64.3,42.7 L65.5,42.2 Z"
+        android:fillColor="#FFFFFF" />
+</vector>
+

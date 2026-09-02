@@ -1,0 +1,6 @@
+{
+  "name": "Human System",
+  "description": "Offline emotional state analyzer with 520+ categorized emotions, autonomic nervous system regulation guidance, achievements, and local backup.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
