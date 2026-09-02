@@ -1,6 +1,15 @@
 package com.example.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,16 +36,20 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Spa
+import androidx.compose.material.icons.filled.UnfoldLess
+import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,10 +57,18 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +92,34 @@ fun EmotionLibraryScreen(
     val librarySelectedCategory by viewModel.librarySelectedCategory.collectAsStateWithLifecycle()
     val selectedEmotions by viewModel.selectedEmotions.collectAsStateWithLifecycle()
     val viewingEmotionDetail by viewModel.viewingEmotionDetail.collectAsStateWithLifecycle()
+
+    val groupedLibraryEmotions = remember(libraryEmotions) {
+        libraryEmotions.groupBy { it.category }
+    }
+    val categoriesInLibrary = remember(groupedLibraryEmotions) {
+        groupedLibraryEmotions.keys.toList()
+    }
+    var expandedCategories by remember {
+        mutableStateOf(
+            if (librarySelectedCategory != null || librarySearchQuery.isNotBlank()) {
+                categoriesInLibrary.toSet()
+            } else {
+                setOf<EmotionCategory>()
+            }
+        )
+    }
+
+    LaunchedEffect(librarySearchQuery, librarySelectedCategory) {
+        if (librarySearchQuery.isNotBlank() || librarySelectedCategory != null) {
+            expandedCategories = categoriesInLibrary.toSet()
+        }
+    }
+
+    val allExpanded by remember(categoriesInLibrary, expandedCategories) {
+        derivedStateOf {
+            categoriesInLibrary.isNotEmpty() && categoriesInLibrary.all { it in expandedCategories }
+        }
+    }
 
     LazyColumn(
         modifier = modifier
@@ -272,15 +321,6 @@ fun EmotionLibraryScreen(
             }
         }
 
-        // Results count label
-        item {
-            Text(
-                text = "Showing ${libraryEmotions.size} emotion guides:",
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
         if (libraryEmotions.isEmpty()) {
             item {
                 Surface(
@@ -306,17 +346,216 @@ fun EmotionLibraryScreen(
                 }
             }
         } else {
+            // Expand / Collapse All bar for Library
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Categories (${categoriesInLibrary.size}) • ${libraryEmotions.size} Emotion Guides",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    TextButton(
+                        onClick = {
+                            expandedCategories = if (allExpanded) {
+                                emptySet()
+                            } else {
+                                categoriesInLibrary.toSet()
+                            }
+                        },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.testTag("library_toggle_expand_all_button")
+                    ) {
+                        Icon(
+                            imageVector = if (allExpanded) Icons.Default.UnfoldLess else Icons.Default.UnfoldMore,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (allExpanded) "Collapse All" else "Expand All",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                }
+            }
+
+            // Expandable Category Sections in Library
             items(
-                items = libraryEmotions,
-                key = { it.id }
-            ) { emotion ->
-                val isSelected = selectedEmotions.any { it.id == emotion.id }
-                EmotionLibraryItemCard(
-                    emotion = emotion,
-                    isSelected = isSelected,
-                    onToggleSelect = { viewModel.toggleEmotionSelection(emotion) },
-                    onInspect = { viewModel.setViewingEmotionDetail(emotion) }
+                items = groupedLibraryEmotions.keys.toList(),
+                key = { it.name }
+            ) { category ->
+                val categoryEmotions = groupedLibraryEmotions[category] ?: emptyList()
+                val catColor = Color(category.colorHex)
+                val isAutoExpanded = (librarySearchQuery.isNotBlank() && categoryEmotions.isNotEmpty()) || (librarySelectedCategory == category)
+                val isExpanded = isAutoExpanded || (category in expandedCategories)
+
+                val selectedInThisCat = categoryEmotions.count { emotion ->
+                    selectedEmotions.any { it.id == emotion.id }
+                }
+
+                val chevronRotation by animateFloatAsState(
+                    targetValue = if (isExpanded) 180f else 0f,
+                    animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
+                    label = "libraryChevronRotation_${category.name}"
                 )
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("library_category_section_${category.name}"),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isExpanded) {
+                            MaterialTheme.colorScheme.surface
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                        }
+                    ),
+                    border = BorderStroke(
+                        width = if (isExpanded || selectedInThisCat > 0) 1.5.dp else 1.dp,
+                        color = if (selectedInThisCat > 0) catColor else catColor.copy(alpha = if (isExpanded) 0.5f else 0.25f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp)
+                    ) {
+                        // Header
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    expandedCategories = if (category in expandedCategories) {
+                                        expandedCategories - category
+                                    } else {
+                                        expandedCategories + category
+                                    }
+                                }
+                                .padding(vertical = 2.dp)
+                                .testTag("library_category_header_${category.name}"),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = catColor,
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = category.getCategoryIcon(),
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "${category.emoji} ${category.displayName}",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = (-0.2).sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = category.description,
+                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = if (isExpanded) 2 else 1
+                                    )
+                                }
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                if (selectedInThisCat > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = catColor
+                                    ) {
+                                        Text(
+                                            text = "✓ $selectedInThisCat",
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            ),
+                                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                        )
+                                    }
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = catColor.copy(alpha = 0.15f)
+                                ) {
+                                    Text(
+                                        text = "${categoryEmotions.size} guides",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = catColor
+                                        ),
+                                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                    )
+                                }
+
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .rotate(chevronRotation)
+                                )
+                            }
+                        }
+
+                        // Expanded list of emotion guide cards
+                        AnimatedVisibility(
+                            visible = isExpanded,
+                            enter = expandVertically(animationSpec = tween(240, easing = FastOutSlowInEasing)) + fadeIn(animationSpec = tween(240)),
+                            exit = shrinkVertically(animationSpec = tween(180, easing = FastOutSlowInEasing)) + fadeOut(animationSpec = tween(180))
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                HorizontalDivider(
+                                    color = catColor.copy(alpha = 0.15f),
+                                    thickness = 1.dp
+                                )
+
+                                categoryEmotions.forEach { emotion ->
+                                    val isSelected = selectedEmotions.any { it.id == emotion.id }
+                                    EmotionLibraryItemCard(
+                                        emotion = emotion,
+                                        isSelected = isSelected,
+                                        onToggleSelect = { viewModel.toggleEmotionSelection(emotion) },
+                                        onInspect = { viewModel.setViewingEmotionDetail(emotion) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

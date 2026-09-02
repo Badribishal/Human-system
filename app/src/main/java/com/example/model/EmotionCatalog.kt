@@ -642,6 +642,178 @@ object EmotionCatalog {
             list.add(e(item.first, item.second, EmotionCategory.GROUNDING_RESILIENCE, item.third.first, item.third.second, parts[0], parts[1], parts[2]))
         }
 
+        // 14. GUILT & REGRET (35 emotions)
+        val guiltData = listOf(
+            Triple("guilt_core", "Guilty", Triple(-0.70f, 0.65f, "Heavy sinking in chest, downward glance|Conscience signaling violation of ethics|Identify what amends can be made")),
+            Triple("guilt_remorse", "Remorseful", Triple(-0.80f, 0.60f, "Aching throat, deep moral pain|Deep sorrow over harm caused to another|Offer a sincere and humble apology")),
+            Triple("guilt_regretful", "Regretful", Triple(-0.65f, 0.50f, "Sigh of yearning, wishing to undo|Wish to choose differently in retrospect|Extract the hard wisdom for the future")),
+            Triple("guilt_penitent", "Penitent", Triple(-0.72f, 0.45f, "Bowed head, contrite heart|Desire to atone and make restitution|Commit to corrective action")),
+            Triple("guilt_contrite", "Contrite", Triple(-0.75f, 0.40f, "Broken ego, softened spirit|Sincere humility in wrongdoing|Listen without defensiveness")),
+            Triple("guilt_self_blame", "Self-Blaming", Triple(-0.78f, 0.70f, "Pointing inward, mental condemnation|Taking excessive fault on self|Distinguish your part from external factors")),
+            Triple("guilt_culpable", "Culpable", Triple(-0.60f, 0.55f, "Tension in jaw, acknowledging mistake|Acceptance of accountability|Own the outcome clearly")),
+            Triple("guilt_apologetic", "Apologetic", Triple(-0.55f, 0.50f, "Open hesitant hands, soft tone|Desire to repair relationship breach|Speak clear words of ownership")),
+            Triple("guilt_chagrined", "Chagrined", Triple(-0.50f, 0.45f, "Blushing face, lowered eyes|Embarrassment coupled with regret|Accept that mistakes are human")),
+            Triple("guilt_rueful", "Rueful", Triple(-0.48f, 0.40f, "Wry smile with sad eyes|Affectionate awareness of folly|Forgive your earlier ignorance")),
+            Triple("guilt_self_accusing", "Self-Accusing", Triple(-0.82f, 0.75f, "Throbbing temples, sharp internal critic|Internal prosecutor on trial|Replace cruelty with firm self-correction")),
+            Triple("guilt_burdened", "Burdened by Guilt", Triple(-0.85f, 0.55f, "Heavy shoulders weighed down|Unresolved debt of conscience|Write out what restitution looks like")),
+            Triple("guilt_repentant", "Repentant", Triple(-0.68f, 0.50f, "Tearful resolve, turning around|Turning away from harmful patterns|Walk the new path consistently")),
+            Triple("guilt_sheepish", "Sheepish", Triple(-0.40f, 0.45f, "Awkward grin, scratching head|Caught in small blunder|Acknowledge the awkwardness gracefully")),
+            Triple("guilt_conscience_pangs", "Pangs of Conscience", Triple(-0.74f, 0.68f, "Sudden sharp pinch in heart|Intuitive alert of ethical breach|Stop the action causing moral dissonance")),
+            Triple("guilt_fault_ridden", "Fault-Ridden", Triple(-0.76f, 0.60f, "Cringing posture, hyper-focus on errors|Feeling everything went wrong because of you|Separate facts from emotional projection")),
+            Triple("guilt_self_condemning", "Self-Condemning", Triple(-0.88f, 0.70f, "Cold gut, crushing self-talk|Judging self unworthy of forgiveness|Offer yourself restorative grace")),
+            Triple("guilt_morally_pained", "Morally Pained", Triple(-0.78f, 0.55f, "Somatic knot in diaphragm|Integrity violated by circumstance|Take the honorable moral step")),
+            Triple("guilt_wracked", "Wracked with Guilt", Triple(-0.90f, 0.80f, "Physical nausea, sleepless nights|Severe moral crisis over consequence|Seek professional or spiritual counsel")),
+            Triple("guilt_chastened", "Chastened", Triple(-0.62f, 0.35f, "Subdued quietness, sobered mind|Humbled by hard lesson|Integrate the humility as strength")),
+            Triple("guilt_conscience_stricken", "Conscience-Stricken", Triple(-0.80f, 0.65f, "Restless chest, inability to relax|Demanding amends be made|Do the right thing immediately")),
+            Triple("guilt_undoing_wish", "Wishing to Undo", Triple(-0.70f, 0.60f, "Staring at hands in disbelief|Desire for time reversal|Accept that what is done cannot be undone")),
+            Triple("guilt_mortified_action", "Mortified by Actions", Triple(-0.82f, 0.75f, "Face burning, stomach churning|Extreme horror at one's own blunder|Take a grounding breath; this too shall pass")),
+            Triple("guilt_scrupulous", "Scrupulous", Triple(-0.60f, 0.70f, "Obsessive checking of intent|Hyper-vigilance over moral perfection|Practice realistic human tolerance")),
+            Triple("guilt_self_punishing", "Self-Punishing", Triple(-0.85f, 0.75f, "Deprivation of joy, harsh inner voice|Believing suffering earns redemption|True redemption is living rightly, not self-harm")),
+            Triple("guilt_indebted", "Indebted", Triple(-0.55f, 0.45f, "Obligated posture, heavy duty|Sense of unpaid emotional balance|Clarify healthy boundaries of duty")),
+            Triple("guilt_belated_sorrow", "Belated Sorrow", Triple(-0.72f, 0.40f, "Mournful reflection years later|Realizing consequences delayed in time|Send blessing to those you affected")),
+            Triple("guilt_atoning", "Atoning", Triple(-0.50f, 0.55f, "Focused diligent labor|Active restoration of harmony|Channel effort into constructive good")),
+            Triple("guilt_complicit", "Complicit", Triple(-0.75f, 0.60f, "Uneasy silence, downcast face|Guilt of standing by during injustice|Speak up for the vulnerable")),
+            Triple("guilt_betrayal_remorse", "Remorseful Betrayer", Triple(-0.88f, 0.70f, "Sharp agony in chest, burning eyes|Grief over breaking trust of beloved|Accept consequences with full dignity")),
+            Triple("guilt_hypocrisy_pain", "Pain of Hypocrisy", Triple(-0.74f, 0.65f, "Dry mouth, internal dissonance|Acting against preached ideals|Align your private life with your speech")),
+            Triple("guilt_neglectful_remorse", "Neglectful Regret", Triple(-0.70f, 0.50f, "Aching regret over missed visits|Grief of taking loved ones for granted|Reach out to those still here")),
+            Triple("guilt_sober_amends", "Seeking Amends", Triple(-0.45f, 0.50f, "Calm deliberate speech, steady eye|Mature commitment to reconciliation|Make restitution without making it about your ego")),
+            Triple("guilt_forgiven", "Longing for Forgiveness", Triple(-0.65f, 0.55f, "Open supplicant hands|Yearning for relational restoration|Start by extending forgiveness to self")),
+            Triple("guilt_reconciled", "Humbled Wisdom", Triple(0.20f, 0.35f, "Release of tension, deep exhale|Integration of painful moral lesson|Walk forward in conscious integrity"))
+        )
+        for (item in guiltData) {
+            val parts = item.third.third.split("|")
+            list.add(e(item.first, item.second, EmotionCategory.GUILT_REGRET, item.third.first, item.third.second, parts[0], parts[1], parts[2]))
+        }
+
+        // 15. JEALOUSY & ENVY (35 emotions)
+        val envyData = listOf(
+            Triple("envy_core", "Envious", Triple(-0.65f, 0.60f, "Green heat in gut, critical glare|Discontent sparked by another's gain|Identify what you truly desire for yourself")),
+            Triple("envy_jealous", "Jealous", Triple(-0.72f, 0.75f, "Possessive tension, watchful eyes|Fear of losing valued bond to rival|Communicate vulnerable feelings of insecurity")),
+            Triple("envy_covetous", "Covetous", Triple(-0.58f, 0.65f, "Hungry stare, grasping hands|Craving what belongs to another|Cultivate gratitude for what is in your hands")),
+            Triple("envy_resentful_comparison", "Resentful Comparison", Triple(-0.70f, 0.60f, "Sour taste, dismissive remark|Bitterness at another's perceived ease|Remember everyone fights hidden battles")),
+            Triple("envy_green_eyed", "Green-Eyed", Triple(-0.68f, 0.70f, "Tight stomach, stinging eyes|Toxic perception of another's fortune|Breathe out the poison of comparison")),
+            Triple("envy_threatened_insecurity", "Threatened Insecurity", Triple(-0.75f, 0.80f, "Racing heart, defensive armoring|Perception of being replaced or eclipsed|Ground in your irreplaceable unique essence")),
+            Triple("envy_bitter_rivalry", "Bitter Rivalry", Triple(-0.74f, 0.85f, "Locked jaw, measuring every score|Hyper-competitive hostility|Shift from beating them to mastering self")),
+            Triple("envy_possessive", "Possessive", Triple(-0.65f, 0.70f, "Clinging grip, vigilant scrutiny|Fear of loss disguised as control|Loosen your grasp; love requires freedom")),
+            Triple("envy_begrudging", "Begrudging", Triple(-0.50f, 0.45f, "Forced applause, tight lips|Reluctant acknowledgment of another|Practice genuine generosity of spirit")),
+            Triple("envy_fomo", "Fear of Missing Out", Triple(-0.55f, 0.75f, "Scrolling frenzy, frantic heartbeat|Anxiety that others live better lives|Disconnect from digital feeds for 24h")),
+            Triple("envy_inadequate_compare", "Comparison Inadequacy", Triple(-0.76f, 0.50f, "Hollow chest, diminished spine|Feeling small next to someone's highlight|Compare only to who you were yesterday")),
+            Triple("envy_territorial", "Territorial", Triple(-0.60f, 0.75f, "Standing tall, marking boundaries|Defense of status or social turf|Cultivate abundance mentality")),
+            Triple("envy_suspicious_jealousy", "Suspiciously Jealous", Triple(-0.78f, 0.80f, "Snoop impulse, racing pulse|Projected betrayal and hyper-vigilance|Have an honest transparent conversation")),
+            Triple("envy_competitive_malice", "Competitive Malice", Triple(-0.80f, 0.75f, "Schadenfreude urge, cold smirk|Desire for rival's downfall|Cleanse mind with self-respect")),
+            Triple("envy_spiteful_envy", "Spiteful Envy", Triple(-0.75f, 0.70f, "Venom in throat, sharp sarcasm|Tasting bitterness in another's triumph|Wish them well to free your own soul")),
+            Triple("envy_left_out", "Feeling Left Out", Triple(-0.68f, 0.45f, "Lump in throat, standing on perimeter|Excluded from inner circle|Create your own welcoming circle")),
+            Triple("envy_suppressed_resent", "Suppressed Resentment", Triple(-0.70f, 0.55f, "Clenched teeth behind polite smile|Unexpressed grudge at unfair rewards|Channel grievance into assertive merit")),
+            Triple("envy_discontent_compare", "Discontented Comparison", Triple(-0.58f, 0.50f, "Heavy sigh looking at another's life|Depreciation of one's current path|Celebrate your unique timeline")),
+            Triple("envy_coveting_success", "Coveting Success", Triple(-0.62f, 0.65f, "Restless pacing, hunger for prestige|Longing for external validation|Define your internal standard of success")),
+            Triple("envy_grudging_admiration", "Grudging Admiration", Triple(-0.35f, 0.50f, "Nod with crossed arms|Recognizing excellence with slight envy|Convert envy into study and mentorship")),
+            Triple("envy_burning_envy", "Burning Envy", Triple(-0.82f, 0.85f, "Hot chest, spinning thoughts|Fierce internal fire of jealousy|Cool down with nature walk and cold water")),
+            Triple("envy_acutely_possessive", "Acutely Possessive", Triple(-0.80f, 0.80f, "Tight clutching, desperate defense|Obsessive guarding of relationship|Heal the underlying attachment wound")),
+            Triple("envy_threatened_rival", "Threatened by Rival", Triple(-0.72f, 0.78f, "Adrenaline spike, sizing up newcomer|Perception of lost supremacy|Collaborate instead of competing")),
+            Triple("envy_smoldering_insecurity", "Smoldering Insecurity", Triple(-0.66f, 0.55f, "Simmering unease beneath surface|Constant fear of being second best|Affirm your innate sovereignty")),
+            Triple("envy_jealous_obsession", "Jealous Obsession", Triple(-0.85f, 0.88f, "Mental carousel around rival|Loss of focus on own life|Redirect 100% of mental energy back to you")),
+            Triple("envy_resenting_privilege", "Resenting Privilege", Triple(-0.64f, 0.60f, "Anger at unearned advantages|Moral frustration at inequality|Work strategically to level the field")),
+            Triple("envy_covetous_pining", "Covetous Pining", Triple(-0.60f, 0.50f, "Aching stomach, empty palms|Yearning for what others possess|Focus on creating rather than consuming")),
+            Triple("envy_diminished_others", "Diminished by Others", Triple(-0.70f, 0.40f, "Slumped shoulders, quiet retreat|Feeling overshadowed in public|Stand tall in your own light")),
+            Triple("envy_begrudging_praise", "Begrudging Praise", Triple(-0.45f, 0.40f, "Tight smile, short applause|Difficulty celebrating others' wins|Rejoice in others' joy (Mudita)")),
+            Triple("envy_eclipsed", "Feeling Eclipsed", Triple(-0.68f, 0.45f, "Cold shadow over posture|Feeling overlooked for another|Your time in the sun will come")),
+            Triple("envy_bitterly_compete", "Bitterly Competitive", Triple(-0.74f, 0.80f, "Intense stare, aggressive drive|Need to destroy the competition|Remember peace is greater than supremacy")),
+            Triple("envy_invidious", "Invidious", Triple(-0.65f, 0.55f, "Looking for flaws in successful people|Defensive rationalization of envy|Honor excellence wherever it appears")),
+            Triple("envy_coveting_recognition", "Hungry for Recognition", Triple(-0.55f, 0.65f, "Tense neck, searching for applause|Craving external praise|Validate your own hard work first")),
+            Triple("envy_jealous_angst", "Jealous Angst", Triple(-0.75f, 0.70f, "Knot in solar plexus, churn|Agony of romantic uncertainty|Seek security in self-trust")),
+            Triple("envy_transmuted", "Transmuted Aspiration", Triple(0.25f, 0.60f, "Sparks in eyes, upright spine|Turning envy into constructive inspiration|Let another's success prove what is possible"))
+        )
+        for (item in envyData) {
+            val parts = item.third.third.split("|")
+            list.add(e(item.first, item.second, EmotionCategory.JEALOUSY_ENVY, item.third.first, item.third.second, parts[0], parts[1], parts[2]))
+        }
+
+        // 16. LONELINESS & ISOLATION (35 emotions)
+        val lonelyData = listOf(
+            Triple("lonely_core", "Lonely", Triple(-0.72f, 0.35f, "Cold empty chest, aching solitude|Drive to seek social bonding and tribe|Reach out for one authentic conversation")),
+            Triple("lonely_isolated", "Isolated", Triple(-0.78f, 0.25f, "Behind glass sensation, muted sounds|Separation from human community|Step into a shared public space or park")),
+            Triple("lonely_alienated", "Alienated", Triple(-0.80f, 0.40f, "Feeling foreign among people|Profound disconnection from culture/peers|Find sub-cultures sharing your values")),
+            Triple("lonely_estranged", "Estranged", Triple(-0.82f, 0.35f, "Severed chord sensation in spine|Painful rift with family or friend|Hold compassion while respecting boundaries")),
+            Triple("lonely_forsaken", "Forsaken", Triple(-0.90f, 0.30f, "Hollow abdomen, desolate gaze|Belief of total desertion by all|You are never truly alone in human history")),
+            Triple("lonely_abandoned", "Abandoned", Triple(-0.92f, 0.55f, "Primal chill, trembling chest|Fear of being discarded and left|Be the parent to your inner child")),
+            Triple("lonely_excluded", "Excluded", Triple(-0.75f, 0.50f, "Cold periphery, watching doorway|Pain of intentional rejection|Seek spaces where you are celebrated")),
+            Triple("lonely_disconnected", "Socially Disconnected", Triple(-0.65f, 0.30f, "Low engagement, scrolling alone|Absence of meaningful relational depth|Call a friend instead of texting")),
+            Triple("lonely_misfit", "Misfit", Triple(-0.55f, 0.40f, "Square peg posture, awkward stance|Feeling unsuited for current crowd|Embrace your rare and distinctive mind")),
+            Triple("lonely_ostracized", "Ostracized", Triple(-0.88f, 0.60f, "Silent cold shoulder, exile posture|Social exile by tribe or group|Build a new tribe aligned with truth")),
+            Triple("lonely_solitary_ache", "Solitary Ache", Triple(-0.70f, 0.30f, "Ache in sternum during quiet evening|Desire for quiet presence of another|Listen to comforting warm music")),
+            Triple("lonely_homesick_belong", "Homesick for Belonging", Triple(-0.74f, 0.35f, "Wistful gaze, hand on chest|Yearning for a spiritual or human home|Create a sanctuary in your current room")),
+            Triple("lonely_invisible", "Feeling Invisible", Triple(-0.76f, 0.20f, "Transparent sensation, soft voice|Feeling unnoticed by people in room|Speak up clearly and take up space")),
+            Triple("lonely_unheard", "Unheard", Triple(-0.68f, 0.45f, "Throat constriction, silenced words|Efforts to communicate falling flat|Write your thoughts where they are preserved")),
+            Triple("lonely_unseen", "Unseen", Triple(-0.72f, 0.25f, "Veiled eyes, hidden personality|Lack of mirroring and understanding|Show your true art to trusted allies")),
+            Triple("lonely_outcast", "Outcast", Triple(-0.82f, 0.45f, "Wandering steps, defensive jacket|Exclusion from dominant collective|Honor the tradition of noble outsiders")),
+            Triple("lonely_unwanted", "Unwanted", Triple(-0.85f, 0.35f, "Shrinking posture, averted eyes|Belief of being a burden|Know that you have intrinsic right to exist")),
+            Triple("lonely_yearning_connect", "Yearning for Connection", Triple(-0.65f, 0.50f, "Reaching posture, warm eyes|Hunger for mutual intimacy|Attend an interest club or workshop")),
+            Triple("lonely_cold_solitude", "Cold Solitude", Triple(-0.70f, 0.20f, "Shiver in empty apartment|Solitude lacking warmth or purpose|Make hot tea and wrap in cozy wool")),
+            Triple("lonely_forgotten", "Forgotten", Triple(-0.78f, 0.20f, "Unchecked phone, quiet mailbox|Sense of being deleted from memory|Initiate contact; do not wait to be found")),
+            Triple("lonely_deserted", "Deserted", Triple(-0.86f, 0.30f, "Empty crossroads, wind in ears|Sudden departure of comrades|Keep walking forward on your quest")),
+            Triple("lonely_companionless", "Companionless", Triple(-0.68f, 0.25f, "Solo dining, quiet walk|Absence of partner or teammate|Appreciate the freedom in solo journey")),
+            Triple("lonely_hermetic_sadness", "Hermetic Sadness", Triple(-0.60f, 0.20f, "Curtained room, quiet sanctuary|Over-isolation turning melancholic|Open the windows and let sunlight in")),
+            Triple("lonely_displaced", "Displaced", Triple(-0.74f, 0.40f, "Unfamiliar streets, unsettled steps|Loss of cultural or geographic roots|Connect with fellow expats or newcomers")),
+            Triple("lonely_rootless", "Rootless", Triple(-0.70f, 0.30f, "Floating feet, unanchored mind|Lack of deep generational ties|Plant roots in today's daily soil")),
+            Triple("lonely_cut_off", "Cut Off", Triple(-0.78f, 0.35f, "Wall erected, severed telephone wire|Inability to reach across divide|Keep your internal door unlocked")),
+            Triple("lonely_emotional_exile", "Emotional Exile", Triple(-0.84f, 0.30f, "Living in shadow of community|Banishment for authenticity|Wear your authenticity with dignity")),
+            Triple("lonely_untethered", "Untethered", Triple(-0.72f, 0.25f, "Drifting balloon sensation|Absence of relational anchors|Anchor in a daily rhythm and routine")),
+            Triple("lonely_longing_tribe", "Longing for Tribe", Triple(-0.65f, 0.45f, "Scanning crowds for kindred souls|Seeking people of shared spirit|Share your niche passion online/in-person")),
+            Triple("lonely_secluded_sorrow", "Secluded Sorrow", Triple(-0.76f, 0.20f, "Hiding grief behind closed door|Suffering without witnesses|Let one person witness your struggle")),
+            Triple("lonely_void_intimacy", "Void of Intimacy", Triple(-0.80f, 0.35f, "Aching arms, hunger for touch|Lack of physical/emotional warmth|Hug a pet or practice self-soothing touch")),
+            Triple("lonely_cast_aside", "Cast Aside", Triple(-0.85f, 0.40f, "Dropped on floor feeling, grief|Feeling discarded after use|Reclaim your unassailable self-value")),
+            Triple("lonely_detached_world", "Detached from World", Triple(-0.75f, 0.20f, "Looking from orbit at earth|Depersonalized distance from crowds|Touch tree bark or cool water")),
+            Triple("lonely_unaccompanied", "Unaccompanied", Triple(-0.55f, 0.25f, "Walking solo through life's trials|Braving hardship without co-pilot|Take pride in your solo courage")),
+            Triple("lonely_rich_solitude", "Sacred Solitude", Triple(0.35f, 0.20f, "Warm spacious silence in room|Transmuting isolation into communion|Enjoy deep friendship with your own soul"))
+        )
+        for (item in lonelyData) {
+            val parts = item.third.third.split("|")
+            list.add(e(item.first, item.second, EmotionCategory.LONELINESS_ISOLATION, item.third.first, item.third.second, parts[0], parts[1], parts[2]))
+        }
+
+        // 17. NUMBNESS & APATHY (35 emotions)
+        val numbData = listOf(
+            Triple("numb_core", "Numb", Triple(-0.70f, 0.05f, "Absence of physical sensation, cold core|Dorsal vagal protective shutdown|Gently rub hands together and breathe")),
+            Triple("numb_apathetic", "Apathetic", Triple(-0.60f, 0.10f, "Listless shrug, indifferent voice|Conservation of depleted energy|Do not force excitement; allow resting")),
+            Triple("numb_blunted", "Emotionally Blunted", Triple(-0.65f, 0.08f, "Muted affect, flat response to news|Protective damper over high pain|Eat something with strong sensory taste")),
+            Triple("numb_dissociated", "Dissociated", Triple(-0.80f, 0.15f, "Floating above body, dreamlike view|Survival response to trauma overload|Press feet into ground, name 5 colors")),
+            Triple("numb_flat_affect", "Flat Affect", Triple(-0.55f, 0.05f, "Immobile face, monotone voice|Nervous system in low-voltage mode|Listen to rhythmic heartbeat or drumming")),
+            Triple("numb_indifferent", "Indifferent", Triple(-0.40f, 0.10f, "Neutral shrug, lack of care|Defense against repeated disappointment|Honor the boundary of not caring")),
+            Triple("numb_listless", "Listless", Triple(-0.58f, 0.08f, "Heavy limbs, drifting attention|Depletion of motivational neurotransmitters|Rest without screen stimulation")),
+            Triple("numb_unresponsive", "Unresponsive", Triple(-0.75f, 0.05f, "Blank stare, delayed processing|Shutdown under sensory deluge|Reduce lights, sound, and demands")),
+            Triple("numb_detached", "Detached", Triple(-0.50f, 0.12f, "Analytical distance, no feeling|Observing life as an outsider|Notice physical temperature of palms")),
+            Triple("numb_emotionless", "Emotionless", Triple(-0.60f, 0.05f, "Empty glass container sensation|Temporary quietus of feelings|Allow this resting interlude")),
+            Triple("numb_burnout_paralysis", "Burnout Paralysis", Triple(-0.85f, 0.10f, "Inability to initiate tasks|Exhaustion of adrenal and neural reserves|Declare a mandatory rest day")),
+            Triple("numb_anhedonic", "Anhedonic", Triple(-0.78f, 0.12f, "Gray food, joyless music, flat|Inability to register pleasure|Take a warm bath with epsom salts")),
+            Triple("numb_hollow", "Hollow Numbness", Triple(-0.74f, 0.08f, "Scooped out chest, vacant stare|Feeling like an empty shell|Nourish body with warm comforting broth")),
+            Triple("numb_frozen_internally", "Frozen Internally", Triple(-0.82f, 0.10f, "Ice encased heart, rigid stillness|Dorsal vagal freeze state|Apply a warm heating pad to belly")),
+            Triple("numb_mechanized", "Mechanized", Triple(-0.55f, 0.20f, "Robotic movements, autopilot|Survival by going through the motions|Pause and take three conscious breaths")),
+            Triple("numb_void", "The Void", Triple(-0.88f, 0.05f, "Total vacuum in consciousness|Profound emptiness of experience|Remember emptiness precedes new creation")),
+            Triple("numb_desensitized", "Desensitized", Triple(-0.50f, 0.10f, "Toughened skin, lack of flinch|Habituation to chronic stress|Remove yourself from toxic noise")),
+            Triple("numb_emotionally_muted", "Emotionally Muted", Triple(-0.52f, 0.08f, "Volume turned down to 10%|Systemic noise cancellation|Spend an hour in quiet nature")),
+            Triple("numb_drained_zero", "Drained to Zero", Triple(-0.85f, 0.05f, "Battery blinking empty|Complete zeroing of bio-energy|Sleep and replenish electrolytes")),
+            Triple("numb_catatonic_still", "Catatonic Stillness", Triple(-0.90f, 0.02f, "Immobility, staring at wall|Extreme defense against overload|Ensure safe resting environment")),
+            Triple("numb_blase", "Blasé", Triple(-0.35f, 0.15f, "Weary cynicism, jaded smirk|Over-saturation of novelty|Simplify your life down to essentials")),
+            Triple("numb_disengaged", "Disengaged", Triple(-0.45f, 0.12f, "Hands off steering wheel feeling|Checked out of the situation|Re-evaluate if you need to be there")),
+            Triple("numb_unmoved", "Unmoved", Triple(-0.40f, 0.08f, "Solid stone wall, no ripple|Immunity to emotional appeal|Examine if protection has become a cage")),
+            Triple("numb_passive_stasis", "Passive Stasis", Triple(-0.62f, 0.06f, "Drifting in current, no paddle|Loss of active will|Make one tiny choice today")),
+            Triple("numb_somatic_freeze", "Somatic Freeze", Triple(-0.80f, 0.08f, "Cold extremities, shallow breath|Threat response freezing motor output|Shake out arms and jump gently")),
+            Triple("numb_gray_fog", "Gray Numbness", Triple(-0.68f, 0.08f, "Colorless perception of room|Loss of emotional saturation|Step out into green foliage")),
+            Triple("numb_disconnected_body", "Disconnected from Body", Triple(-0.76f, 0.10f, "Head disconnected from neck|Living entirely in abstract thought|Do barefoot grounding on soil/rug")),
+            Triple("numb_chronic_burnout", "Chronic Burnout", Triple(-0.86f, 0.12f, "Bone-deep weariness, cynicism|Months of unsustainable exertion|Radically renegotiate commitments")),
+            Triple("numb_deadened", "Deadened", Triple(-0.84f, 0.05f, "Lead weight in limbs, no spark|Deep suppression of all affect|Treat yourself as a patient in recovery")),
+            Triple("numb_petrified", "Petrified Numbness", Triple(-0.80f, 0.08f, "Turned to stone feeling|Shock calcified into stiffness|Gentle stretching with warm oil")),
+            Triple("numb_stagnant", "Stagnant", Triple(-0.55f, 0.10f, "Still pond without inflow|Lack of circulation of energy|Open windows, air out room, stretch")),
+            Triple("numb_inert", "Inert", Triple(-0.65f, 0.05f, "Object at rest unable to move|Newtonian resistance to motion|Ask a friend to help you take step 1")),
+            Triple("numb_exhausted_void", "Emotionally Exhausted", Triple(-0.82f, 0.08f, "Dry well, hollow bucket|Giving until nothing remains|Refill your own well with deep rest")),
+            Triple("numb_blank", "Blank Slate", Triple(-0.40f, 0.05f, "Clear whiteboard, no marks|Post-storm neutral clearing|Rest in this clean slate")),
+            Triple("numb_anesthetized", "Anesthetized Peace", Triple(0.10f, 0.08f, "Pain is blocked, floating calm|Temporary grace of feeling no pain|Use this relief to heal gently"))
+        )
+        for (item in numbData) {
+            val parts = item.third.third.split("|")
+            list.add(e(item.first, item.second, EmotionCategory.NUMBNESS_APATHY, item.third.first, item.third.second, parts[0], parts[1], parts[2]))
+        }
+
         list
     }
 

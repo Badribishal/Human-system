@@ -31,6 +31,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -39,10 +42,13 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.UnfoldLess
+import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -51,6 +57,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -67,14 +74,18 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -107,6 +118,37 @@ fun RecordEmotionsScreen(
     val currentDiagnosis by viewModel.currentDiagnosis.collectAsStateWithLifecycle()
     val filteredEmotions by viewModel.filteredEmotions.collectAsStateWithLifecycle()
     val viewingEmotionDetail by viewModel.viewingEmotionDetail.collectAsStateWithLifecycle()
+
+    val groupedEmotions = remember(filteredEmotions) {
+        filteredEmotions.groupBy { it.category }
+    }
+    val categoriesInFiltered = remember(groupedEmotions) {
+        groupedEmotions.keys.toList()
+    }
+    val selectedEmotionIds = remember(selectedEmotions) {
+        selectedEmotions.map { it.id }.toSet()
+    }
+    var expandedCategories by remember {
+        mutableStateOf(
+            if (selectedCategory != null || searchQuery.isNotBlank()) {
+                categoriesInFiltered.toSet()
+            } else {
+                setOf<EmotionCategory>()
+            }
+        )
+    }
+
+    LaunchedEffect(searchQuery, selectedCategory) {
+        if (searchQuery.isNotBlank() || selectedCategory != null) {
+            expandedCategories = categoriesInFiltered.toSet()
+        }
+    }
+
+    val allExpanded by remember(categoriesInFiltered, expandedCategories) {
+        derivedStateOf {
+            categoriesInFiltered.isNotEmpty() && categoriesInFiltered.all { it in expandedCategories }
+        }
+    }
 
     AnimatedContent(
         targetState = activeSubTab,
@@ -155,7 +197,7 @@ fun RecordEmotionsScreen(
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
-                            text = "Catalog of ${EmotionCatalog.totalCount} distinct emotional states across 13 categories",
+                            text = "Catalog of ${EmotionCatalog.totalCount} distinct emotional states across ${EmotionCategory.values().size} categories",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -513,9 +555,9 @@ fun RecordEmotionsScreen(
                 }
             }
 
-            // Emotions Grouped By Category
+            // Emotions Grouped By Category with Expandable Accordions
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     if (filteredEmotions.isEmpty()) {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
@@ -540,101 +582,258 @@ fun RecordEmotionsScreen(
                             }
                         }
                     } else {
-                        // Group the filtered emotions by their actual categories
-                        val categoriesInFiltered = EmotionCategory.values().filter { cat ->
-                            filteredEmotions.any { it.category == cat }
+                        // Header bar with Expand/Collapse All toggle
+                        val categoriesInFiltered = groupedEmotions.keys.toList()
+                        val allExpanded = categoriesInFiltered.isNotEmpty() && categoriesInFiltered.all { it in expandedCategories }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Emotional Spheres (${categoriesInFiltered.size} Categories)",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+
+                            TextButton(
+                                onClick = {
+                                    expandedCategories = if (allExpanded) {
+                                        emptySet()
+                                    } else {
+                                        categoriesInFiltered.toSet()
+                                    }
+                                },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                modifier = Modifier.testTag("toggle_expand_all_button")
+                            ) {
+                                Icon(
+                                    imageVector = if (allExpanded) Icons.Default.UnfoldLess else Icons.Default.UnfoldMore,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (allExpanded) "Collapse All" else "Expand All",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
                         }
 
                         categoriesInFiltered.forEach { category ->
-                            val categoryEmotions = filteredEmotions.filter { it.category == category }
+                            val categoryEmotions = groupedEmotions[category] ?: emptyList()
                             val catColor = Color(category.colorHex)
+                            val isAutoExpandedByFilter = (searchQuery.isNotBlank() && categoryEmotions.isNotEmpty()) || (selectedCategory == category)
+                            val isExpanded = isAutoExpandedByFilter || (category in expandedCategories)
+
+                            val selectedInThisCat = categoryEmotions.count { emotion ->
+                                selectedEmotions.any { it.id == emotion.id }
+                            }
+
+                            val chevronRotation by animateFloatAsState(
+                                targetValue = if (isExpanded) 180f else 0f,
+                                animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
+                                label = "chevronRotation_${category.name}"
+                            )
 
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("category_section_${category.name}"),
-                                shape = RoundedCornerShape(20.dp),
+                                shape = RoundedCornerShape(18.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surface
+                                    containerColor = if (isExpanded) {
+                                        MaterialTheme.colorScheme.surface
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                    }
                                 ),
-                                border = BorderStroke(1.dp, catColor.copy(alpha = 0.3f))
+                                border = BorderStroke(
+                                    width = if (isExpanded || selectedInThisCat > 0) 1.5.dp else 1.dp,
+                                    color = if (selectedInThisCat > 0) catColor else catColor.copy(alpha = if (isExpanded) 0.5f else 0.25f)
+                                )
                             ) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                        .padding(14.dp)
                                 ) {
-                                    // Category Header Banner
+                                    // Clickable Category Header Banner
                                     Row(
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .clickable {
+                                                expandedCategories = if (category in expandedCategories) {
+                                                    expandedCategories - category
+                                                } else {
+                                                    expandedCategories + category
+                                                }
+                                            }
+                                            .padding(vertical = 2.dp)
+                                            .testTag("category_header_${category.name}"),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                            modifier = Modifier.weight(1f)
                                         ) {
                                             Surface(
                                                 shape = CircleShape,
                                                 color = catColor,
-                                                modifier = Modifier.size(28.dp)
+                                                modifier = Modifier.size(32.dp)
                                             ) {
                                                 Box(contentAlignment = Alignment.Center) {
                                                     Icon(
                                                         imageVector = category.getCategoryIcon(),
                                                         contentDescription = null,
                                                         tint = Color.White,
-                                                        modifier = Modifier.size(16.dp)
+                                                        modifier = Modifier.size(18.dp)
                                                     )
                                                 }
                                             }
 
-                                            Column {
-                                                Text(
-                                                    text = "${category.emoji} ${category.displayName}",
-                                                    style = MaterialTheme.typography.titleMedium.copy(
-                                                        fontWeight = FontWeight.Bold
-                                                    ),
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                                ) {
+                                                    Text(
+                                                        text = "${category.emoji} ${category.displayName}",
+                                                        style = MaterialTheme.typography.titleMedium.copy(
+                                                            fontWeight = FontWeight.Bold,
+                                                            letterSpacing = (-0.2).sp
+                                                        ),
+                                                        color = MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                }
                                                 Text(
                                                     text = category.description,
                                                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = if (isExpanded) 2 else 1
                                                 )
                                             }
                                         }
 
-                                        Surface(
-                                            shape = RoundedCornerShape(8.dp),
-                                            color = catColor.copy(alpha = 0.15f)
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
-                                            Text(
-                                                text = "${categoryEmotions.size}",
-                                                style = MaterialTheme.typography.labelSmall.copy(
-                                                    fontWeight = FontWeight.Bold,
+                                            // Prominent Badge for selected feelings in this category
+                                            if (selectedInThisCat > 0) {
+                                                Surface(
+                                                    shape = RoundedCornerShape(8.dp),
                                                     color = catColor
-                                                ),
-                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                                ) {
+                                                    Text(
+                                                        text = "✓ $selectedInThisCat",
+                                                        style = MaterialTheme.typography.labelSmall.copy(
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = Color.White
+                                                        ),
+                                                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            // Total count chip in category
+                                            Surface(
+                                                shape = RoundedCornerShape(8.dp),
+                                                color = catColor.copy(alpha = 0.15f)
+                                            ) {
+                                                Text(
+                                                    text = "${categoryEmotions.size}",
+                                                    style = MaterialTheme.typography.labelSmall.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = catColor
+                                                    ),
+                                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                                )
+                                            }
+
+                                            // Animated chevron expand indicator
+                                            Icon(
+                                                imageVector = Icons.Default.KeyboardArrowDown,
+                                                contentDescription = if (isExpanded) "Collapse category" else "Expand category",
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier
+                                                    .size(24.dp)
+                                                    .rotate(chevronRotation)
                                             )
                                         }
                                     }
 
-                                    // Category Emotions Flow
-                                    FlowRow(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    // Expandable Content Body with smooth height & fade animation
+                                    AnimatedVisibility(
+                                        visible = isExpanded,
+                                        enter = expandVertically(animationSpec = tween(240, easing = FastOutSlowInEasing)) + fadeIn(animationSpec = tween(240)),
+                                        exit = shrinkVertically(animationSpec = tween(180, easing = FastOutSlowInEasing)) + fadeOut(animationSpec = tween(180))
                                     ) {
-                                        categoryEmotions.forEach { emotion ->
-                                            val isSelected = selectedEmotions.any { it.id == emotion.id }
-                                            EmotionChip(
-                                                emotion = emotion,
-                                                isSelected = isSelected,
-                                                onClick = { viewModel.toggleEmotionSelection(emotion) },
-                                                onInfoClick = { viewModel.setViewingEmotionDetail(emotion) }
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            HorizontalDivider(
+                                                color = catColor.copy(alpha = 0.15f),
+                                                thickness = 1.dp
                                             )
+
+                                            // Category Actions Bar (Quick Clear / Info)
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = "Tap to select • ℹ for somatic guide",
+                                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+
+                                                if (selectedInThisCat > 0) {
+                                                    TextButton(
+                                                        onClick = {
+                                                            categoryEmotions.forEach { emotion ->
+                                                                if (selectedEmotions.any { it.id == emotion.id }) {
+                                                                    viewModel.toggleEmotionSelection(emotion)
+                                                                }
+                                                            }
+                                                        },
+                                                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                                                    ) {
+                                                        Text(
+                                                            text = "Clear Category ($selectedInThisCat)",
+                                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                                fontWeight = FontWeight.SemiBold,
+                                                                color = MaterialTheme.colorScheme.error
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                            // Category Emotions Flow
+                                            FlowRow(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                categoryEmotions.forEach { emotion ->
+                                                    val isSelected = selectedEmotions.any { it.id == emotion.id }
+                                                    EmotionChip(
+                                                        emotion = emotion,
+                                                        isSelected = isSelected,
+                                                        onClick = { viewModel.toggleEmotionSelection(emotion) },
+                                                        onInfoClick = { viewModel.setViewingEmotionDetail(emotion) }
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }

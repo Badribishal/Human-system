@@ -1,7 +1,9 @@
 package com.example.model
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.EmojiEmotions
@@ -9,7 +11,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FilterDrama
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Spa
@@ -125,6 +129,42 @@ enum class EmotionCategory(
         0xFFFBECEF,
         0xFF3E1E28
     ),
+    GUILT_REGRET(
+        "Guilt & Regret",
+        "Remorse, self-reproach, moral conscience, and amends",
+        "⚖️",
+        0xFF8D6E63,
+        0xFFBCAAA4,
+        0xFFEFEBE9,
+        0xFF3E2723
+    ),
+    JEALOUSY_ENVY(
+        "Jealousy & Envy",
+        "Comparison, covetousness, insecurity, and rivalry",
+        "👁️",
+        0xFF4A7C59,
+        0xFF81C784,
+        0xFFE8F5E9,
+        0xFF1B5E20
+    ),
+    LONELINESS_ISOLATION(
+        "Loneliness & Isolation",
+        "Disconnection, alienation, and longing for belonging",
+        "🪹",
+        0xFF455A64,
+        0xFF90A4AE,
+        0xFFECEFF1,
+        0xFF263238
+    ),
+    NUMBNESS_APATHY(
+        "Numbness & Apathy",
+        "Emotional blunting, dissociation, indifference, and paralysis",
+        "🧊",
+        0xFF607D8B,
+        0xFFB0BEC5,
+        0xFFECEFF1,
+        0xFF263238
+    ),
     CONFUSION_AMBIVALENCE(
         "Confusion & Ambivalence",
         "Uncertainty, mixed signals, and seeking clarity",
@@ -159,6 +199,10 @@ enum class EmotionCategory(
             AWE_CURIOSITY -> Icons.Default.AutoAwesome
             OVERWHELM_FATIGUE -> Icons.Default.FilterDrama
             VULNERABILITY_SHAME -> Icons.Default.Lock
+            GUILT_REGRET -> Icons.Default.Balance
+            JEALOUSY_ENVY -> Icons.Default.RemoveRedEye
+            LONELINESS_ISOLATION -> Icons.Default.PersonOff
+            NUMBNESS_APATHY -> Icons.Default.AcUnit
             CONFUSION_AMBIVALENCE -> Icons.Default.QuestionMark
             GROUNDING_RESILIENCE -> Icons.Default.SelfImprovement
         }
