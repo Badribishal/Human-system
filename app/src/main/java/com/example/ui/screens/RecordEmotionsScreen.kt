@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -81,6 +82,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -101,6 +103,14 @@ import com.example.ui.components.EmotionDetailDialog
 import com.example.ui.components.SystemStatusCard
 import com.example.ui.viewmodel.HumanSystemViewModel
 
+/**
+ * Navigation state holder for managing screen transitions and back-stack within the Record tab.
+ */
+enum class RecordScreenState {
+    RECORD_MAIN,
+    EMOTION_LIBRARY
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecordEmotionsScreen(
@@ -108,7 +118,12 @@ fun RecordEmotionsScreen(
     onRecordSaved: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var activeSubTab by remember { mutableIntStateOf(0) } // 0: Log Feelings, 1: Emotion Library
+    var currentScreen by rememberSaveable { mutableStateOf(RecordScreenState.RECORD_MAIN) }
+
+    // Explicit BackHandler intercepting system back gesture / back button
+    BackHandler(enabled = currentScreen == RecordScreenState.EMOTION_LIBRARY) {
+        currentScreen = RecordScreenState.RECORD_MAIN
+    }
 
     val selectedEmotions by viewModel.selectedEmotions.collectAsStateWithLifecycle()
     val intensity by viewModel.intensity.collectAsStateWithLifecycle()
@@ -151,9 +166,9 @@ fun RecordEmotionsScreen(
     }
 
     AnimatedContent(
-        targetState = activeSubTab,
+        targetState = currentScreen,
         transitionSpec = {
-            if (targetState > initialState) {
+            if (targetState == RecordScreenState.EMOTION_LIBRARY) {
                 (slideInHorizontally(animationSpec = tween(280, easing = FastOutSlowInEasing)) { width -> width / 3 } + fadeIn(animationSpec = tween(280)))
                     .togetherWith(slideOutHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> -width / 3 } + fadeOut(animationSpec = tween(220)))
             } else {
@@ -162,21 +177,23 @@ fun RecordEmotionsScreen(
             }
         },
         label = "RecordSubTabAnimatedContent"
-    ) { currentSubTab ->
-        if (currentSubTab == 1) {
-            EmotionLibraryScreen(
-                viewModel = viewModel,
-                onNavigateToRecord = { activeSubTab = 0 },
-                modifier = modifier
-            )
-        } else {
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxSize()
-                    .testTag("record_emotions_screen"),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+    ) { screen ->
+        when (screen) {
+            RecordScreenState.EMOTION_LIBRARY -> {
+                EmotionLibraryScreen(
+                    viewModel = viewModel,
+                    onNavigateToRecord = { currentScreen = RecordScreenState.RECORD_MAIN },
+                    modifier = modifier
+                )
+            }
+            RecordScreenState.RECORD_MAIN -> {
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .testTag("record_emotions_screen"),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
             // Screen Header with Top Quick Save / Entry Button
             item {
                 Row(
@@ -271,10 +288,10 @@ fun RecordEmotionsScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(10.dp))
-                                .clickable { activeSubTab = 0 }
+                                .clickable { currentScreen = RecordScreenState.RECORD_MAIN }
                                 .testTag("subtab_log_feelings"),
-                            color = if (activeSubTab == 0) MaterialTheme.colorScheme.surface else Color.Transparent,
-                            shadowElevation = if (activeSubTab == 0) 2.dp else 0.dp,
+                            color = if (currentScreen == RecordScreenState.RECORD_MAIN) MaterialTheme.colorScheme.surface else Color.Transparent,
+                            shadowElevation = if (currentScreen == RecordScreenState.RECORD_MAIN) 2.dp else 0.dp,
                             shape = RoundedCornerShape(10.dp)
                         ) {
                             Row(
@@ -285,16 +302,16 @@ fun RecordEmotionsScreen(
                                 Icon(
                                     imageVector = Icons.Default.Edit,
                                     contentDescription = null,
-                                    tint = if (activeSubTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    tint = if (currentScreen == RecordScreenState.RECORD_MAIN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "Log Feelings",
                                     style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = if (activeSubTab == 0) FontWeight.Bold else FontWeight.Medium
+                                        fontWeight = if (currentScreen == RecordScreenState.RECORD_MAIN) FontWeight.Bold else FontWeight.Medium
                                     ),
-                                    color = if (activeSubTab == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (currentScreen == RecordScreenState.RECORD_MAIN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -303,10 +320,10 @@ fun RecordEmotionsScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(10.dp))
-                                .clickable { activeSubTab = 1 }
+                                .clickable { currentScreen = RecordScreenState.EMOTION_LIBRARY }
                                 .testTag("subtab_emotion_library"),
-                            color = if (activeSubTab == 1) MaterialTheme.colorScheme.surface else Color.Transparent,
-                            shadowElevation = if (activeSubTab == 1) 2.dp else 0.dp,
+                            color = if (currentScreen == RecordScreenState.EMOTION_LIBRARY) MaterialTheme.colorScheme.surface else Color.Transparent,
+                            shadowElevation = if (currentScreen == RecordScreenState.EMOTION_LIBRARY) 2.dp else 0.dp,
                             shape = RoundedCornerShape(10.dp)
                         ) {
                             Row(
@@ -317,16 +334,16 @@ fun RecordEmotionsScreen(
                                 Icon(
                                     imageVector = Icons.Default.MenuBook,
                                     contentDescription = null,
-                                    tint = if (activeSubTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    tint = if (currentScreen == RecordScreenState.EMOTION_LIBRARY) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "Emotion Library",
                                     style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = if (activeSubTab == 1) FontWeight.Bold else FontWeight.Medium
+                                        fontWeight = if (currentScreen == RecordScreenState.EMOTION_LIBRARY) FontWeight.Bold else FontWeight.Medium
                                     ),
-                                    color = if (activeSubTab == 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (currentScreen == RecordScreenState.EMOTION_LIBRARY) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -995,9 +1012,10 @@ fun RecordEmotionsScreen(
                     }
                 }
             }
-            }
         }
     }
+}
+}
 
     // Detail Dialog if an emotion is being inspected
     viewingEmotionDetail?.let { emotion ->
