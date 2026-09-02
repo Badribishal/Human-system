@@ -1,6 +1,14 @@
 package com.example.ui.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -100,20 +108,33 @@ fun RecordEmotionsScreen(
     val filteredEmotions by viewModel.filteredEmotions.collectAsStateWithLifecycle()
     val viewingEmotionDetail by viewModel.viewingEmotionDetail.collectAsStateWithLifecycle()
 
-    if (activeSubTab == 1) {
-        EmotionLibraryScreen(
-            viewModel = viewModel,
-            onNavigateToRecord = { activeSubTab = 0 },
-            modifier = modifier
-        )
-    } else {
-        LazyColumn(
-            modifier = modifier
-                .fillMaxSize()
-                .testTag("record_emotions_screen"),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+    AnimatedContent(
+        targetState = activeSubTab,
+        transitionSpec = {
+            if (targetState > initialState) {
+                (slideInHorizontally(animationSpec = tween(280, easing = FastOutSlowInEasing)) { width -> width / 3 } + fadeIn(animationSpec = tween(280)))
+                    .togetherWith(slideOutHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> -width / 3 } + fadeOut(animationSpec = tween(220)))
+            } else {
+                (slideInHorizontally(animationSpec = tween(280, easing = FastOutSlowInEasing)) { width -> -width / 3 } + fadeIn(animationSpec = tween(280)))
+                    .togetherWith(slideOutHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> width / 3 } + fadeOut(animationSpec = tween(220)))
+            }
+        },
+        label = "RecordSubTabAnimatedContent"
+    ) { currentSubTab ->
+        if (currentSubTab == 1) {
+            EmotionLibraryScreen(
+                viewModel = viewModel,
+                onNavigateToRecord = { activeSubTab = 0 },
+                modifier = modifier
+            )
+        } else {
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+                    .testTag("record_emotions_screen"),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
             // Screen Header with Top Quick Save / Entry Button
             item {
                 Row(
@@ -775,17 +796,18 @@ fun RecordEmotionsScreen(
                     }
                 }
             }
+            }
         }
+    }
 
-        // Detail Dialog if an emotion is being inspected
-        viewingEmotionDetail?.let { emotion ->
-            val isSelected = selectedEmotions.any { it.id == emotion.id }
-            EmotionDetailDialog(
-                emotion = emotion,
-                isSelected = isSelected,
-                onToggleSelect = { viewModel.toggleEmotionSelection(emotion) },
-                onDismiss = { viewModel.setViewingEmotionDetail(null) }
-            )
-        }
+    // Detail Dialog if an emotion is being inspected
+    viewingEmotionDetail?.let { emotion ->
+        val isSelected = selectedEmotions.any { it.id == emotion.id }
+        EmotionDetailDialog(
+            emotion = emotion,
+            isSelected = isSelected,
+            onToggleSelect = { viewModel.toggleEmotionSelection(emotion) },
+            onDismiss = { viewModel.setViewingEmotionDetail(null) }
+        )
     }
 }

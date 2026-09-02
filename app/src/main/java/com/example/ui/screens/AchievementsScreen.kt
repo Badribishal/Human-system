@@ -97,7 +97,7 @@ fun AchievementsScreen(
         modifier = modifier
             .fillMaxSize()
             .testTag("achievements_screen"),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // 1. Mastery Level Spotlight Card
@@ -283,13 +283,23 @@ fun AchievementsScreen(
 
                     options.forEach { (index, title, icon) ->
                         val isSelected = activeMasteryOption == index
+                        val animatedContainerColor by androidx.compose.animation.animateColorAsState(
+                            targetValue = if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent,
+                            animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
+                            label = "masteryTabBg"
+                        )
+                        val animatedContentColor by androidx.compose.animation.animateColorAsState(
+                            targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            animationSpec = androidx.compose.animation.core.tween(durationMillis = 200),
+                            label = "masteryTabContent"
+                        )
                         Surface(
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(9.dp))
                                 .clickable { activeMasteryOption = index }
                                 .testTag("mastery_option_tab_$index"),
-                            color = if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent,
+                            color = animatedContainerColor,
                             shadowElevation = if (isSelected) 1.dp else 0.dp,
                             shape = RoundedCornerShape(9.dp)
                         ) {
@@ -301,7 +311,7 @@ fun AchievementsScreen(
                                 Icon(
                                     imageVector = icon,
                                     contentDescription = title,
-                                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    tint = animatedContentColor,
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -311,7 +321,7 @@ fun AchievementsScreen(
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                         fontSize = 11.sp
                                     ),
-                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else animatedContentColor
                                 )
                             }
                         }

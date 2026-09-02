@@ -1,6 +1,11 @@
 package com.example.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -16,6 +22,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.scale
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Check
@@ -210,7 +217,8 @@ fun HumanSystemApp(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, bottom = 28.dp, top = 6.dp),
+                        .navigationBarsPadding()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 4.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Surface(
@@ -233,7 +241,13 @@ fun HumanSystemApp(
                                 selected = pagerState.currentPage == 0,
                                 onClick = {
                                     coroutineScope.launch {
-                                        pagerState.animateScrollToPage(0)
+                                        pagerState.animateScrollToPage(
+                                            page = 0,
+                                            animationSpec = tween(
+                                                durationMillis = 300,
+                                                easing = FastOutSlowInEasing
+                                            )
+                                        )
                                     }
                                 },
                                 icon = if (pagerState.currentPage == 0) Icons.Default.DarkMode else Icons.Outlined.DarkMode,
@@ -245,7 +259,13 @@ fun HumanSystemApp(
                                 selected = pagerState.currentPage == 1,
                                 onClick = {
                                     coroutineScope.launch {
-                                        pagerState.animateScrollToPage(1)
+                                        pagerState.animateScrollToPage(
+                                            page = 1,
+                                            animationSpec = tween(
+                                                durationMillis = 300,
+                                                easing = FastOutSlowInEasing
+                                            )
+                                        )
                                     }
                                 },
                                 icon = if (pagerState.currentPage == 1) Icons.Default.AddCircle else Icons.Outlined.AddCircleOutline,
@@ -257,7 +277,13 @@ fun HumanSystemApp(
                                 selected = pagerState.currentPage == 2,
                                 onClick = {
                                     coroutineScope.launch {
-                                        pagerState.animateScrollToPage(2)
+                                        pagerState.animateScrollToPage(
+                                            page = 2,
+                                            animationSpec = tween(
+                                                durationMillis = 300,
+                                                easing = FastOutSlowInEasing
+                                            )
+                                        )
                                     }
                                 },
                                 icon = if (pagerState.currentPage == 2) Icons.Default.EmojiEvents else Icons.Outlined.EmojiEvents,
@@ -271,9 +297,10 @@ fun HumanSystemApp(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
-            // Horizontal Pager enabling horizontal swipe between 3 tabs
+            // Horizontal Pager enabling smooth swipe & tab transitions (beyondViewportPageCount=2 caches all 3 tabs)
             HorizontalPager(
                 state = pagerState,
+                beyondViewportPageCount = 2,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -284,7 +311,13 @@ fun HumanSystemApp(
                         viewModel = viewModel,
                         onNavigateToRecord = {
                             coroutineScope.launch {
-                                pagerState.animateScrollToPage(1)
+                                pagerState.animateScrollToPage(
+                                    page = 1,
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                )
                             }
                         }
                     )
@@ -292,7 +325,13 @@ fun HumanSystemApp(
                         viewModel = viewModel,
                         onRecordSaved = {
                             coroutineScope.launch {
-                                pagerState.animateScrollToPage(0)
+                                pagerState.animateScrollToPage(
+                                    page = 0,
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                )
                             }
                         }
                     )
@@ -555,18 +594,30 @@ private fun FloatingPillTab(
 ) {
     val animatedBgColor by androidx.compose.animation.animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
         label = "pillTabBg"
     )
     val animatedContentColor by androidx.compose.animation.animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
         label = "pillTabContent"
+    )
+    val tabScale by animateFloatAsState(
+        targetValue = if (selected) 1.0f else 0.96f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "pillTabScale"
     )
 
     Surface(
         onClick = onClick,
         shape = CircleShape,
         color = animatedBgColor,
-        modifier = Modifier.testTag(testTag)
+        modifier = Modifier
+            .scale(tabScale)
+            .testTag(testTag)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
